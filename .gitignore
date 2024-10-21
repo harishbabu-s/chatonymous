@@ -1,2 +1,5 @@
 node_modules
 .env
+[submodule "openup"]
+    path = openup
+    url = <submodule-repo-url>
