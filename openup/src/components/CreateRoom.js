@@ -1,23 +1,21 @@
-// src/components/CreateRoom.js
 import React, { useContext, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useRoom } from '../utils/RoomContext';
 
 const CreateRoom = () => {
-    const { roomName, changeRoomName } = useRoom();
+    const [roomName, changeRoomName] = useState('');
     const [title, setTitle] = useState('');
     const [duration, setDuration] = useState();
     const navigate = useNavigate();
 
-    const createRoom = (e) => {
+    const createRoom = async (e) => {
         e.preventDefault();
-        axios.post('http://localhost:4000/api/rooms/create', { roomName, duration, title })
+        await axios.post('http://localhost:4000/create-room', { roomName, duration, title })
             .then(response => {
-                navigate(`/chat-room/${roomName}/${response.data.passkey}`);
+                navigate(`/chat-room/${roomName}/${response.data.roomPassword}`);
             })
             .catch(error => {
-                alert('Error creating room, Please check Room creation criteria', error)
+                alert(error)
             });
     };
 

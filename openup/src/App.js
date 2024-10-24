@@ -1,11 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './components/Home';
-import CreateRoom from './components/CreateRoom';
-import JoinRoom from './components/JoinRoom';
 import ChatRoom from './components/ChatRoom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Nav from './components/Nav';
+
 
 function App() {
   return (
@@ -14,7 +13,7 @@ function App() {
         <Nav />
         <Routes>
           <Route exact path="/" element={<Home />} />
-          <Route path="/chat-room/:roomName/:passkey" element={<ChatRoom />} />
+          <Route path="/chat-room/:roomName/:roomPassword" element={<ChatRoom />} />
         </Routes>
       </div>
     </Router>
