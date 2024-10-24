@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
+const PORT = process.env.PORT;
 
 
 // Middleware
@@ -87,22 +88,17 @@ io.on('connect', (socket) => {
     console.log('New user connected -', socket.id);
 
     socket.on('join_room', ({ roomName, password }) => {
-        console.log("joined room");
         const room = rooms[roomName];
 
         if (room && room.password === password) {
-            console.log("joined room validated");
 
             if (Date.now() <= room.expiryTime) {
                 socket.join(roomName);
-                console.log("Joined by socket.join");
                 const user_uid = getRandomColor();
                 if (!rooms[roomName].users[socket.id]) {
                     rooms[roomName].users[socket.id] = user_uid;
                 }
-                console.log(rooms);
                 socket.emit('roomJoined', { title: room.title, expiresAt: room.expiryTime, duration: room.duration, user_uid });
-                console.log("---------------------");
                 // rooms[roomName].users[socket.id] = `User${socket.id.slice(-4)}`;
                 // socket.to(roomName).emit('userJoined', rooms[roomName].users[socket.id]);            
                 // socket.to(roomName).emit('userJoined',);
@@ -126,9 +122,7 @@ io.on('connect', (socket) => {
             const room = rooms[roomName];
             if (Date.now() <= room.expiryTime) {
                 const uid = rooms[roomName].users[socket.id];
-                console.log("message received from client");
                 io.to(roomName).emit('receiveMessage', { message, uid });
-                console.log("message sent from server");
             } else {
                 io.in(room).socketsLeave(room);
                 socket.emit('roomExpired');
@@ -139,10 +133,9 @@ io.on('connect', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        // if (rooms[roomName]) {
-        //     socket.to(currentRoom).emit('userLeft', username);
-        // }
-        console.log('A user disconnected');
+        if (rooms[roomName]) {
+            socket.to(currentRoom).emit('userLeft', username);
+        }
     });
 
 
@@ -151,11 +144,8 @@ io.on('connect', (socket) => {
 
 // setInterval(() => {
 //     const now = Date.now();
-//     console.log("in intervalllllllllll")
 //     for (const room in rooms) {
-//         console.log("-------", now, rooms[room].expiryTime)
 //         if (rooms[room].expiryTime < now) {
-//             console.log("deletinggggggg rooooom")
 //             io.to(room).emit('roomExpired');
 //             io.in(room).socketsLeave(room);
 //             delete rooms[room];
@@ -164,6 +154,6 @@ io.on('connect', (socket) => {
 // }, 60000);
 
 
-server.listen(4000, () => {
-    console.log('Server is running on http://localhost:4000');
+server.listen(PORT || 4000, () => {
+    console.log("Server is running on http://localhost: ", PORT ? PORT : 4000);
 });

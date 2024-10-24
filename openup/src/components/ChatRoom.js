@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
+import Nav from './Nav';
 
 let socket;
 
 const ChatRoom = () => {
     const { roomName, roomPassword } = useParams();
     const [title, setTitle] = useState('Untitled topic being discussed');
-    const [expiresAt, setExpiresAt] = useState(0);
+    const [expiresAt, setExpiresAt] = useState();
     const [uid, setUid] = useState(0);
     const [tempUid, setTempUid] = useState(0);
     const [timer, setTimer] = useState(0);
@@ -26,6 +27,7 @@ const ChatRoom = () => {
                 setTitle(title);
             }
             setExpiresAt(expiresAt);
+            handleTimer();
             setUid(user_uid);
             setDuration(duration);
         });
@@ -65,12 +67,17 @@ const ChatRoom = () => {
         }
     };
 
+    // let tempDuration = 0;
+    // while (expiresAt) {
+    //     console.log("--------------", expiresAt, Date.now(), "===================");
+    //     tempDuration = (expiresAt - Date.now()) / 1000;
+    //     console.log("--------------", expiresAt, ".................", Date.now(), "===================");
+    //     break;
+    // }
+
     const handleTimer = () => {
-        const tempDuration = 0;
-        while (expiresAt) {
-            tempDuration = (expiresAt - Date.now()) / 1000;
-            break;
-        }
+        let tempDuration = 0;
+        tempDuration = (expiresAt - Date.now()) / 1000;
         const countdown = tempDuration * 60;
         console.log(Date.now(), "------", expiresAt, "===============", tempDuration, "+++++++++", countdown);
         setTimer(countdown);
@@ -85,9 +92,9 @@ const ChatRoom = () => {
         }, 1000);
     };
 
-    useEffect(() => {
-        handleTimer();
-    }, []);
+    // useEffect(() => {
+    //     handleTimer();
+    // }, []);
 
 
     // const scrollToBottom = () => {
@@ -102,13 +109,16 @@ const ChatRoom = () => {
 
 
     return (
-        <div className='container ' >
-            {/* <h5>{details.title}</h5> */}
-            <h2>{title}</h2>
-            <h4>Room: {roomName}, Password: {roomPassword} </h4>
-            <div>Time remaining: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')} / {duration}:00 </div>
-            {/* <p>Passkey: {details.passkey}</p> */}
-            {/* <div className="chat-container overflow-auto border " style={{ height: '50vh' }}>
+        <div className='d-flex flex-column min-vh-100'>
+            <Nav />
+            <div className='container ' >
+                {/* <h5>{details.title}</h5> */}
+                <div className='d-flex'>
+                    <span style={{ fontSize: '1.5rem' }}>{title}</span>
+                    <div className=' align-content-center ms-auto'><span> [Time remaining: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')} / {duration} mins ]</span></div>
+                </div>
+                {/* <p>Passkey: {details.passkey}</p> */}
+                {/* <div className="chat-container overflow-auto border " style={{ height: '50vh' }}>
                 {messages.map((msg, index) => (
                     <div
                         key={index}
@@ -122,33 +132,34 @@ const ChatRoom = () => {
                 ))}
             </div> */}
 
-            <div className="d-flex flex-column-reverse overflow-auto border" style={{ height: '50vh' }}>
-                {messages.map((msg, index) => {
-                    const isUserMessage = tempUid === uid; // Check if the message is from the current user
-                    const messageClass = `d-inline-block text-${isUserMessage ? 'end' : 'start'} 
+                <div className="flex-fill flex-column-reverse overflow-auto border" style={{ minHeight: '80vh' }} >
+                    {messages.map((msg, index) => {
+                        const isUserMessage = tempUid === uid; // Check if the message is from the current user
+                        const messageClass = `d-inline-block text-${isUserMessage ? 'end' : 'start'} 
                     border border-${tempUid} rounded-${isUserMessage ? 'start' : 'end'}-pill 
                     rounded-${isUserMessage ? 'right' : 'left'}`;
 
-                    return (
-                        // <div key={msg.id} className={messageClass} style={{ backgroundColor: `#${msg.userId}` }}>
-                        <div key={index} className={messageClass} >
-                            {msg}
-                        </div>
-                    );
-                })}
-            </div>
+                        return (
+                            // <div key={msg.id} className={messageClass} style={{ backgroundColor: `#${msg.userId}` }}>
+                            <div key={index} className={messageClass} >
+                                <span>{tempUid} : </span>
+                                {msg}
+                            </div>
+                        );
+                    })}
+                </div>
 
 
-            <div className="input-group mb-2">
-                <input type="text" className="form-control" value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={handleKeyPress}
-                    placeholder="Type message..."
-                    aria-label="Send message"
-                    aria-describedby="button-addon2" />
-                <button className="btn btn-outline-secondary" type="button" onClick={sendMessage} id="button-addon2">Send</button>
-            </div>
-        </div >
+                <div className="input-group ">
+                    <input type="text" className="form-control" value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        placeholder="Type message..."
+                    />
+                    <button className="btn btn-outline-secondary" type="button" onClick={sendMessage} id="button-addon2">Send</button>
+                </div>
+            </div >
+        </div>
     );
 };
 
