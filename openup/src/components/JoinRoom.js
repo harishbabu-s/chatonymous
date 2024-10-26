@@ -24,7 +24,7 @@ const JoinRoom = () => {
     return (
         <div className="container my-2 p-0">
             <input type="text" placeholder="Room Name" className="form-control" value={roomName} onChange={(e) => setRoomName(e.target.value)} />
-            <input type="number" placeholder="6 digit password" className="form-control mt-2" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <input type="number" placeholder="6 digit password" className="form-control mt-2" value={password} onKeyDown={(e) => e.key === 'Enter' && joinRoom(e)} onChange={(e) => setPassword(e.target.value)} />
             <button className="btn btn-primary mt-3" onClick={joinRoom} disabled={!roomName || !password} >Join</button>
         </div>
     );

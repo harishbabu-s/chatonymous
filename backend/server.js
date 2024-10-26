@@ -99,17 +99,8 @@ io.on('connect', (socket) => {
                     rooms[roomName].users[socket.id] = user_uid;
                 }
                 socket.emit('roomJoined', { title: room.title, expiresAt: room.expiryTime, duration: room.duration, user_uid });
-                // rooms[roomName].users[socket.id] = `User${socket.id.slice(-4)}`;
-                // socket.to(roomName).emit('userJoined', rooms[roomName].users[socket.id]);            
-                // socket.to(roomName).emit('userJoined',);
-
-                // // Send previous messages
-                // room.messages.forEach(message => {
-                //     socket.emit('message', message);
-                // });
             } else {
-                io.in(room).socketsLeave(room);
-                socket.emit('roomExpired');
+                roomExpiry(room);
             }
         } else {
             socket.emit('error', 'Inavalid room name or password');
@@ -124,17 +115,16 @@ io.on('connect', (socket) => {
                 const uid = rooms[roomName].users[socket.id];
                 io.to(roomName).emit('receiveMessage', { message, uid });
             } else {
-                io.in(room).socketsLeave(room);
-                socket.emit('roomExpired');
+                roomExpiry(room);
             }
         } else {
             socket.emit('roomError', 'Inavalid room name or password');
         }
     });
 
-    socket.on('disconnect', () => {
-        if (rooms[roomName]) {
-            socket.to(currentRoom).emit('userLeft', username);
+    socket.on('disconnect', (roomName) => {
+        if (roomName) {
+            socket.to(roomName).emit('userLeft', socket.id);
         }
     });
 
@@ -142,16 +132,20 @@ io.on('connect', (socket) => {
 
 });
 
-// setInterval(() => {
-//     const now = Date.now();
-//     for (const room in rooms) {
-//         if (rooms[room].expiryTime < now) {
-//             io.to(room).emit('roomExpired');
-//             io.in(room).socketsLeave(room);
-//             delete rooms[room];
-//         }
-//     }
-// }, 60000);
+const roomExpiry = (room) => {
+    io.in(room).socketsLeave(room);
+    io.to(room.roomName).emit('roomExpired');
+}
+
+setInterval(() => {
+    const now = Date.now();
+    for (const room in rooms) {
+        if (rooms[room].expiryTime < now) {
+            roomExpiry(room);
+            delete rooms[room];
+        }
+    }
+}, 60000);
 
 
 server.listen(PORT || 4000, () => {

@@ -10,13 +10,18 @@ const CreateRoom = () => {
 
     const createRoom = async (e) => {
         e.preventDefault();
-        await axios.post('http://localhost:4000/create-room', { roomName, duration, title })
-            .then(response => {
-                navigate(`/chat-room/${roomName}/${response.data.roomPassword}`);
-            })
-            .catch(error => {
-                alert(error)
-            });
+        try {
+            await axios.post('http://localhost:4000/create-room', { roomName, duration, title })
+                .then(response => {
+                    navigate(`/chat-room/${roomName}/${response.data.roomPassword}`);
+                })
+                .catch(error => {
+                    if (error.response.status === 400) alert('Room name already taken');
+                    else alert(error);
+                });
+        } catch (error) {
+            alert("Error connecting to server, React out developer from contact");
+        }
     };
 
     const durationCondition = duration > 120 || duration < 2;
