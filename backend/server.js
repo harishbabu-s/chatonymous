@@ -19,6 +19,7 @@ const io = socketIo(server, {
 });
 
 const rooms = {};
+const messages = {};
 
 
 // Helper functions
@@ -53,6 +54,10 @@ app.post('/create-room', (req, res) => {
         expiryTime: expiresAt,
         users: {}
     };
+
+    messages[roomName] = [{}];
+
+
     res.json({ roomName, roomPassword, title, duration, expiresAt });
 });
 
@@ -89,6 +94,7 @@ io.on('connect', (socket) => {
 
     socket.on('join_room', ({ roomName, password }) => {
         const room = rooms[roomName];
+        const previousMessages = messages[roomName]
 
         if (room && room.password === password) {
 
@@ -99,6 +105,10 @@ io.on('connect', (socket) => {
                     rooms[roomName].users[socket.id] = user_uid;
                 }
                 socket.emit('roomJoined', { title: room.title, expiresAt: room.expiryTime, duration: room.duration, user_uid });
+
+                previousMessages.forEach(({ message, uid }) => {
+                    socket.emit('receiveMessage', { message, uid });
+                });
             } else {
                 roomExpiry(room);
             }
@@ -113,7 +123,9 @@ io.on('connect', (socket) => {
             const room = rooms[roomName];
             if (Date.now() <= room.expiryTime) {
                 const uid = rooms[roomName].users[socket.id];
+                messages[roomName].push({ message, uid });
                 io.to(roomName).emit('receiveMessage', { message, uid });
+
             } else {
                 roomExpiry(room);
             }

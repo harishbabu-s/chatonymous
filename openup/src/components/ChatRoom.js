@@ -32,7 +32,6 @@ const ChatRoom = () => {
         });
 
         socket.on('receiveMessage', ({ message, uid }) => {
-            console.log("message received")
             setMessages((prev) => [...prev, { message: message, varUid: uid }]);
         });
 
@@ -53,7 +52,6 @@ const ChatRoom = () => {
 
     const sendMessage = () => {
         if (message) {
-            console.log("message sent");
             socket.emit('sendMessage', { roomName, message });
             setMessage('');
         }
@@ -101,11 +99,11 @@ const ChatRoom = () => {
                     <div className=' align-content-center ms-auto'><span> [ Time remaining: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')} / {duration} mins ]</span></div>
                 </div>
 
-                <div className="d-flex flex-column flex-fill overflow-auto pt-2 border" style={{ minHeight: '70vh', maxHeight: '80vh', scrollbarWidth: 'thin', scrollMarginBottom: '10px' }} >
+                <div className="d-flex flex-column flex-fill overflow-auto pt-2 border" style={{ minHeight: '70vh', maxHeight: '70vh', scrollbarWidth: 'thin', scrollMarginBottom: '10px' }} >
                     {messages.map((msgData, index) => {
                         const isUserMessage = msgData.varUid === uid;
                         const messageContainer = `p-0 mx-1 text-${isUserMessage ? 'end' : 'start'}`
-                        const messageClass = `d-inline-block my-1 px-2 fs-5 rounded-${isUserMessage ? 'start' : 'end'}-pill rounded-${isUserMessage ? 'end' : 'start'} border-2`;
+                        const messageClass = `d-inline-block my-1 px-2 fs-5 rounded-${isUserMessage ? 'start' : 'end'}-pill rounded-${isUserMessage ? 'end' : 'start'} border-4`;
 
                         return (
                             <div className={messageContainer}>
