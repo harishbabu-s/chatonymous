@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 4000;
 const app = express();
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
-        ? 'https://your-frontend-service-name.onrender.com'
+        ? 'https://chatonymous-6lzq.onrender.com'
         : 'http://localhost:3000'
 }));
 app.use(express.json());
@@ -19,7 +19,7 @@ const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: process.env.NODE_ENV === 'production'
-            ? 'https://your-frontend-service-name.onrender.com'
+            ? 'https://chatonymous-6lzq.onrender.com'
             : 'http://localhost:3000',
         methods: ["GET", "POST"]
     }
