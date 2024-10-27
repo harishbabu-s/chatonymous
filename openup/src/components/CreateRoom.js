@@ -21,7 +21,7 @@ const CreateRoom = () => {
                     else alert(error);
                 });
         } catch (error) {
-            alert("Error connecting to server, React out developer from contact");
+            alert("Error connecting to server. Please try again later.");
         }
     };
 
@@ -29,7 +29,7 @@ const CreateRoom = () => {
     const roomNameCondition = roomName.length < 4 && roomName.length > 0;
 
     return (
-        <div className="mx- my-2 text-start ">
+        <div className=" my-2 text-start ">
             <form>
                 <label htmlFor="roomTitle" className='h6 m-0'>Title</label>
                 <input type="text" id="roomTitle" className="form-control mb-2" placeholder="Optional topic tile" value={title} onChange={(e) => setTitle(e.target.value)} />

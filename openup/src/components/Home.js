@@ -24,7 +24,7 @@ function Home() {
             <Nav />
             <div className="text-center container-fluid " style={{ backgroundImage: `url(${bgImage})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', minHeight: '100vh' }}>
                 <div className='row justify-content-center py-sm-5'>
-                    <div className=' col col-sm-10 col-md-5 mx-md-3 ' >
+                    <div className=' col col-10 col-md-9 col-lg-5 mx-md-3 mx-lg-3 mt-5 mt-sm-0' >
                         <div className='bg-light rounded'>
                             <h2 className='pt-3'>Share opinions Anonymously</h2>
                             <p className="lead">
@@ -35,13 +35,13 @@ function Home() {
 
                             <div className=" rounded m-3 py-2" style={{ backgroundColor: '#edefec' }}>
                                 <button
-                                    className={`btn btn-sm mx-xs-12 mx-sm-5 mx-md-2 mx-lg-4 mx-xl-5 my-2 ${roomChoice === 'create' ? 'btn-dark' : 'btn-secondary'}`}
+                                    className={`btn btn-sm mx-xs-12 mx-sm-5 mx-md-5 mx-lg-4 mx-xl-5 my-2 ${roomChoice === 'create' ? 'btn-dark' : 'btn-secondary'}`}
                                     onClick={() => handleButton('create')}
                                 >
                                     Create Room
                                 </button>
                                 <button
-                                    className={`btn btn-sm mx-xs-12 mx-sm-5 mx-md-2 mx-lg-4 mx-xl-5 my-2 ${roomChoice === 'join' ? 'btn-dark' : 'btn-secondary'}`}
+                                    className={`btn btn-sm mx-xs-12 mx-sm-5 mx-md-5 mx-lg-4 mx-xl-5 my-2 ${roomChoice === 'join' ? 'btn-dark' : 'btn-secondary'}`}
                                     onClick={() => handleButton('join')}
                                 >
                                     Join Room
@@ -60,7 +60,7 @@ function Home() {
                         </div>
 
                     </div>
-                    <div className=' col col-sm-10 col-md-5 mx-md-3 rounded flex justify-center items-center'>
+                    <div className=' col col-10 col-md-9 col-lg-5 mx-md-3 mx-lg-3 mt-2 mt-sm-0 rounded flex justify-center items-center'>
                         <Samples />
                     </div>
                 </div>

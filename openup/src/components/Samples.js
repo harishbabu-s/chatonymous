@@ -8,9 +8,15 @@ const Samples = () => {
     const [position, setPosition] = useState(0);
 
     const items = [
-        { id: 3, image: sample3, alt: "Image 3" },
-        { id: 1, image: sample1, alt: "Image 1" },
-        { id: 2, image: sample2, alt: "Image 2" },
+        { id: 1, image: sample3, alt: "Image 3" },
+        { id: 2, image: sample1, alt: "Image 1" },
+        { id: 3, image: sample2, alt: "Image 2" },
+        { id: 4, image: sample3, alt: "Image 3" },
+        { id: 5, image: sample1, alt: "Image 1" },
+        { id: 6, image: sample2, alt: "Image 2" },
+        { id: 7, image: sample3, alt: "Image 3" },
+        { id: 8, image: sample1, alt: "Image 1" },
+        { id: 9, image: sample2, alt: "Image 2" },
     ];
 
     useEffect(() => {
@@ -21,7 +27,7 @@ const Samples = () => {
                 }
                 return prev - 0.1;
             });
-        }, 50);
+        }, 100);
         return () => clearInterval(scrollInterval);
     }, []);
 
