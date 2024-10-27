@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import Nav from './Nav';
+import config from '../config';
 
 let socket;
 
@@ -18,7 +19,7 @@ const ChatRoom = () => {
     const messageEndRef = useRef(null);
 
     useEffect(() => {
-        socket = io(`http://localhost:4000`);
+        socket = io(`${config.socketUrl}`);
         socket.emit('join_room', { roomName, password: roomPassword });
 
         socket.on('roomJoined', ({ title, expiresAt, duration, user_uid }) => {

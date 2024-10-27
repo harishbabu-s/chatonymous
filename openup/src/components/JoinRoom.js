@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../config';
 
 const JoinRoom = () => {
     const [roomName, setRoomName] = useState('');
@@ -9,7 +10,7 @@ const JoinRoom = () => {
 
     const joinRoom = async (e) => {
         e.preventDefault();
-        await axios.post('http://localhost:4000/join-room/', { roomName, password })
+        await axios.post(`${config.apiUrl}/join-room/`, { roomName, password })
             .then((res) => {
                 if (res.data.roomName && res.data.password) {
                     navigate(`/chat-room/${res.data.roomName}/${res.data.password}`);

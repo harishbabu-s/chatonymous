@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import config from '../config';
 
 const CreateRoom = () => {
     const [roomName, changeRoomName] = useState('');
@@ -11,7 +12,7 @@ const CreateRoom = () => {
     const createRoom = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:4000/create-room', { roomName, duration, title })
+            await axios.post(`${config.apiUrl}/create-room`, { roomName, duration, title })
                 .then(response => {
                     navigate(`/chat-room/${roomName}/${response.data.roomPassword}`);
                 })

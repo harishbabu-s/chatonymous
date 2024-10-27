@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "/static/css/main.5aabfff3.css",
+    "main.js": "/static/js/main.d9e8f02e.js",
+    "static/media/bg-fit-home.png": "/static/media/bg-fit-home.e476dfa44abe978d5c8e.png",
+    "static/media/chatonymous_logo.png": "/static/media/chatonymous_logo.a95dd81cb834913309fb.png",
+    "static/media/sample2.png": "/static/media/sample2.48ce3d6f2e15103a1a1a.png",
+    "static/media/sample3.png": "/static/media/sample3.f827f873149d586bc913.png",
+    "static/media/sample1.png": "/static/media/sample1.204fbb2fbc0e8e01dce9.png",
+    "index.html": "/index.html",
+    "main.5aabfff3.css.map": "/static/css/main.5aabfff3.css.map",
+    "main.d9e8f02e.js.map": "/static/js/main.d9e8f02e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.5aabfff3.css",
+    "static/js/main.d9e8f02e.js"
+  ]
+}
