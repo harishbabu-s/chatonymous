@@ -1,19 +1,26 @@
+require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
-const PORT = process.env.PORT;
 
+const PORT = process.env.PORT || 4000;
 
 // Middleware
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production'
+        ? 'https://your-frontend-service-name.onrender.com'
+        : 'http://localhost:3000'
+}));
 app.use(express.json());
 
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: 'http://localhost:3000',
+        origin: process.env.NODE_ENV === 'production'
+            ? 'https://your-frontend-service-name.onrender.com'
+            : 'http://localhost:3000',
         methods: ["GET", "POST"]
     }
 });
@@ -77,6 +84,16 @@ app.post('/join-room', (req, res) => {
 
 });
 
+app.get('/rooms/all-messages', (req, res) => {
+    res.json(messages);
+});
+
+app.get('/rooms/messages/:roomName', (req, res) => {
+    const { roomName } = req.params;
+    const roomMessages = messages[roomName];
+    res.json(roomMessages);
+});
+
 app.get('/rooms', (req, res) => {
     res.json(rooms);
 });
@@ -90,7 +107,7 @@ app.get('/rooms/:roomName', (req, res) => {
 
 // Socket.io
 io.on('connect', (socket) => {
-    console.log('New user connected -', socket.id);
+    // console.log('New user connected -', socket.id);
 
     socket.on('join_room', ({ roomName, password }) => {
         const room = rooms[roomName];
@@ -130,7 +147,7 @@ io.on('connect', (socket) => {
                 roomExpiry(room);
             }
         } else {
-            socket.emit('roomError', 'Inavalid room name or password');
+            socket.emit('roomError', 'Inavalid room name or password \n OR \n Room has expired');
         }
     });
 
@@ -160,6 +177,6 @@ setInterval(() => {
 }, 60000);
 
 
-server.listen(PORT || 4000, () => {
+server.listen(PORT, () => {
     console.log("Server is running on http://localhost: ", PORT ? PORT : 4000);
 });

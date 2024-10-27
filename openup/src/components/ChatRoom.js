@@ -62,7 +62,11 @@ const ChatRoom = () => {
     }, [messages]);
 
     const handleKeyPress = (event) => {
-        if (event.key === 'Enter') {
+        if (event.key === 'Enter' && event.shiftKey) {
+            event.preventDefault();
+            setMessage((prev) => prev + '\n');
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
             sendMessage();
         }
     };
@@ -103,11 +107,11 @@ const ChatRoom = () => {
                     {messages.map((msgData, index) => {
                         const isUserMessage = msgData.varUid === uid;
                         const messageContainer = `p-0 mx-1 text-${isUserMessage ? 'end' : 'start'}`
-                        const messageClass = `d-inline-block my-1 px-2 fs-5 rounded-${isUserMessage ? 'start' : 'end'}-pill rounded-${isUserMessage ? 'end' : 'start'} border-4`;
+                        const messageClass = `d-inline-block my-1 px-2 fs-5 rounded-${isUserMessage ? 'start-4' : 'end-4'} border-4`;
 
                         return (
                             <div className={messageContainer}>
-                                <div key={index} className={messageClass} style={{ border: `solid #${msgData.varUid}` }} >
+                                <div key={index} className={messageClass} style={{ border: `solid #${msgData.varUid}`, whiteSpace: 'pre-wrap' }} >
                                     {msgData.message}
                                 </div>
                             </div>
@@ -116,10 +120,11 @@ const ChatRoom = () => {
                     <div ref={messageEndRef} />
                 </div>
                 <div className="input-group ">
-                    <input type="text" className="form-control" value={message}
+                    <textarea type="text" className="form-control" value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={handleKeyPress}
                         placeholder="Type message..."
+                        style={{ height: '1rem', maxHeight: '3rem' }}
                     />
                     <button className="btn btn-outline-secondary" type="button" onClick={sendMessage} id="button-addon2">Send</button>
                 </div>
