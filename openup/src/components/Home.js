@@ -35,7 +35,7 @@ function Home() {
     }
 
     useEffect(() => {
-        // server();
+        server();
     }, []);
 
     return (
