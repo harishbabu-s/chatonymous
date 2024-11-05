@@ -17,8 +17,8 @@ const Nav = () => {
 
                 {location.pathname === `/chat-room/${roomName}/${roomPassword}` &&
                     <div className='d-flex me-0'>
-                        <a className='mx-3 d-inline-block text-danger text-decoration-none fs-3 align-text-center' >
-                            <img src={leave} alt="🔙" width="30" height="30" className="m-0" href="/" />
+                        <a className='mx-3 d-inline-block text-danger text-decoration-none fs-3 align-text-center' href='/' >
+                            <img src={leave} alt="🔙" width="30" height="30" className="m-0" />
                             Leave
                         </a>
                         <div className=''>

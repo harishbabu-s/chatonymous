@@ -7,13 +7,16 @@ const CreateRoom = () => {
     const [roomName, changeRoomName] = useState('');
     const [title, setTitle] = useState('');
     const [duration, setDuration] = useState();
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const createRoom = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             await axios.post(`${config.apiUrl}/create-room`, { roomName, duration, title })
                 .then(response => {
+                    setLoading(false);
                     navigate(`/chat-room/${roomName}/${response.data.roomPassword}`);
                 })
                 .catch(error => {
@@ -22,6 +25,7 @@ const CreateRoom = () => {
                 });
         } catch (error) {
             alert("Error connecting to server. Please try again later.");
+            setLoading(false);
         }
     };
 
@@ -32,7 +36,7 @@ const CreateRoom = () => {
         <div className=" my-2 text-start ">
             <form>
                 <label htmlFor="roomTitle" className='h6 m-0'>Title</label>
-                <input type="text" id="roomTitle" className="form-control mb-2" placeholder="Optional topic tile" value={title} onChange={(e) => setTitle(e.target.value)} />
+                <input type="text" id="roomTitle" className="form-control mb-2" placeholder="Optional topic title" value={title} onChange={(e) => setTitle(e.target.value)} />
 
                 <label htmlFor="roomName" className='h6 m-0'>Room Name {roomNameCondition ? <span className='text-danger'>* min 4 characters</span> : ''} </label>
                 <input type="text" id="roomName" className="form-control mb-2" placeholder="Room Name" value={roomName} onChange={(e) => changeRoomName(e.target.value)} />
@@ -42,6 +46,7 @@ const CreateRoom = () => {
 
                 <button type="submit" className='btn btn-success mt-3' disabled={durationCondition || roomName.length < 4} onClick={createRoom}>Create Room</button>
             </form>
+            {loading && <div className='text-center mt-2'><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
         </div>
     );
 };

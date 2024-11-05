@@ -3,6 +3,7 @@ const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
+const { type } = require("os");
 
 const PORT = process.env.PORT || 4000;
 
@@ -28,7 +29,6 @@ const io = socketIo(server, {
 const rooms = {};
 const messages = {};
 
-
 // Helper functions
 const generatePassword = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -43,8 +43,31 @@ const getRandomColor = () => {
     return color;
 };
 
+const uUserID = (room) => {
+    const uniqueCodes = ["FF0000", "00FF00", "0000FF", "FFFF00", "FF00FF", "00FFFF", "000000", "800000", "800080", "808080", "C0C0C0", "400000", "000040", "404000", "004040", "404040", "002000", "000020", "006000", "006060",];
+
+    randomDefinedCode = () => {
+        let temp = uniqueCodes[Math.floor(Math.random() * uniqueCodes.length)];
+        if (Object.values(room.users).includes(temp)) {
+            randomDefinedCode();
+        } else {
+            return temp;
+        }
+    }
+
+    if (Object.keys(room.users).length < uniqueCodes.length) {
+        return randomDefinedCode();
+    } else {
+        getRandomColor();
+    }
+};
+
 
 // Routes
+app.get('/', (req, res) => {
+    res.send("Server is running");
+})
+
 app.post('/create-room', (req, res) => {
     const { roomName, duration, title } = req.body;
     const roomPassword = generatePassword();
@@ -59,7 +82,8 @@ app.post('/create-room', (req, res) => {
         title,
         duration,
         expiryTime: expiresAt,
-        users: {}
+        users: {},
+        inRoomUsers: []
     };
 
     messages[roomName] = [{}];
@@ -110,73 +134,93 @@ io.on('connect', (socket) => {
     // console.log('New user connected -', socket.id);
 
     socket.on('join_room', ({ roomName, password }) => {
+        if (!rooms[roomName]) {
+            return socket.emit('roomError', 'Room not found OR Room has expired');
+        }
         const room = rooms[roomName];
         const previousMessages = messages[roomName]
 
         if (room && room.password === password) {
 
             if (Date.now() <= room.expiryTime) {
-                socket.join(roomName);
-                const user_uid = getRandomColor();
-                if (!rooms[roomName].users[socket.id]) {
-                    rooms[roomName].users[socket.id] = user_uid;
-                }
-                socket.emit('roomJoined', { title: room.title, expiresAt: room.expiryTime, duration: room.duration, user_uid });
+                const user_uid = uUserID(room);
+                room.users[socket.id] = user_uid;
+                room.inRoomUsers.push(user_uid);
 
-                previousMessages.forEach(({ message, uid }) => {
-                    socket.emit('receiveMessage', { message, uid });
+                socket.join(roomName);
+                socket.emit('roomJoined', { title: room.title, expiresAt: room.expiryTime, duration: room.duration, user_uid });
+                io.to(roomName).emit('usersUpdate', { inRoomUsers: room.inRoomUsers });
+
+                previousMessages.forEach(({ message, uid, type }) => {
+                    socket.emit('receiveMessage', { message, uid, type });
                 });
+
+                messages[roomName].push({ message: 'joined', uid: user_uid, type: 'info' });
+                io.to(roomName).emit('receiveMessage', { message: 'joined', uid: user_uid, type: 'info' });
             } else {
-                roomExpiry(room);
+                socket.emit('roomError', 'Room has expired');
             }
         } else {
-            socket.emit('error', 'Inavalid room name or password');
+            socket.emit('roomError', 'Inavalid room name or password');
         }
-
     });
 
-    socket.on('sendMessage', ({ roomName, message }) => {
+    socket.on('sendMessage', ({ roomName, message, type }) => {
         if (rooms[roomName]) {
             const room = rooms[roomName];
             if (Date.now() <= room.expiryTime) {
-                const uid = rooms[roomName].users[socket.id];
-                messages[roomName].push({ message, uid });
-                io.to(roomName).emit('receiveMessage', { message, uid });
+                const uid = room.users[socket.id];
+                messages[roomName].push({ message, uid, type });
+                io.to(roomName).emit('receiveMessage', { message, uid, type });
 
             } else {
-                roomExpiry(room);
+                socket.emit('roomError', 'Room has expired');
             }
         } else {
-            socket.emit('roomError', 'Inavalid room name or password \n OR \n Room has expired');
-        }
-    });
-
-    socket.on('disconnect', (roomName) => {
-        if (roomName) {
-            socket.to(roomName).emit('userLeft', socket.id);
+            socket.emit('roomError', 'Room has expired');
         }
     });
 
 
+    socket.on('leaveRoom', ({ roomName, userId }) => {
+        if (rooms[roomName]) {
+            leaveRoom(roomName, userId);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        for (const roomName in rooms) {
+            if (rooms[roomName].users[socket.id]) {
+                const userId = rooms[roomName].users[socket.id];
+                leaveRoom(roomName, userId);
+                break;
+            }
+        }
+    });
+
+    const leaveRoom = (roomName, userId) => {
+        rooms[roomName].inRoomUsers = rooms[roomName].inRoomUsers.filter(id => id !== userId);
+        socket.to(roomName).emit('userLeft', rooms[roomName].inRoomUsers);
+        messages[roomName].push({ message: 'left', uid: userId, type: 'info' });
+        io.to(roomName).emit('receiveMessage', { message: 'left', uid: userId, type: 'info' });
+        io.to(roomName).emit('usersUpdate', { inRoomUsers: rooms[roomName].inRoomUsers });
+        if (rooms[roomName].inRoomUsers.length === 0) {
+            delete rooms[roomName];
+        }
+    }
 
 });
 
-const roomExpiry = (room) => {
-    io.in(room).socketsLeave(room);
-    io.to(room.roomName).emit('roomExpired');
-}
 
 setInterval(() => {
     const now = Date.now();
     for (const room in rooms) {
         if (rooms[room].expiryTime < now) {
-            roomExpiry(room);
             delete rooms[room];
         }
     }
 }, 60000);
 
-
 server.listen(PORT, () => {
-    console.log("Server is running on http://localhost: ", PORT ? PORT : 4000);
+    console.log("Server is running", process.env.NODE_ENV === 'production' ? " : https://chatonymous-6lzq.onrender.com" : " : http://localhost: ", PORT ? PORT : 4000);
 });

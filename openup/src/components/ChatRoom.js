@@ -13,6 +13,7 @@ const ChatRoom = () => {
     const [uid, setUid] = useState(0);
     const [timer, setTimer] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [users, setUsers] = useState([]);
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
 
@@ -22,38 +23,36 @@ const ChatRoom = () => {
         socket = io(`${config.socketUrl}`);
         socket.emit('join_room', { roomName, password: roomPassword });
 
-        socket.on('roomJoined', ({ title, expiresAt, duration, user_uid }) => {
-            console.log("Room joined")
+        socket.on('roomJoined', ({ title, expiresAt, duration, user_uid, inRoomUsers }) => {
             if (title !== '') {
                 setTitle(title);
             }
             setExpiresAt(expiresAt);
-            setUid(user_uid);
             setDuration(duration);
+            setUid(user_uid);
         });
 
-        socket.on('receiveMessage', ({ message, uid }) => {
-            setMessages((prev) => [...prev, { message: message, varUid: uid }]);
+        socket.on('usersUpdate', ({ inRoomUsers }) => {
+            setUsers(inRoomUsers);
         });
 
-        socket.on('roomExpired', () => {
-            alert('Room expired');
-            socket.disconnect();
+        socket.on('receiveMessage', ({ message, uid, type }) => {
+            setMessages((prev) => [...prev, { message: message, varUid: uid, type: type }]);
         });
 
-        socket.on('roomError', () => {
-            alert('Invalid Room Name or Password');
-            socket.disconnect();
+        socket.on('roomError', (error) => {
+            alert(error);
         });
 
         return () => {
-            socket.disconnect(roomName);
+            socket.emit('leaveRoom', { roomName, uid });
+            socket.disconnect();
         };
     }, [roomName, roomPassword]);
 
     const sendMessage = () => {
         if (message) {
-            socket.emit('sendMessage', { roomName, message });
+            socket.emit('sendMessage', { roomName, message, type: 'message' });
             setMessage('');
         }
     };
@@ -71,7 +70,6 @@ const ChatRoom = () => {
             sendMessage();
         }
     };
-
 
     const handleTimer = () => {
         const countdown = Math.round((expiresAt - Date.now()) / 1000);
@@ -100,15 +98,21 @@ const ChatRoom = () => {
             <Nav />
             <div className='container ' >
                 <div className='d-flex'>
-                    <span style={{ fontSize: '1.5rem' }}>{title}</span>
-                    <div className=' align-content-center ms-auto'><span> [ Time remaining: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')} / {duration} mins ]</span></div>
+                    <span style={{ fontSize: '1.5rem' }}><u>{title}</u></span>
+                    <div className=' align-content-center ms-auto'><span> [ Time left: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')} / {duration} mins ]</span></div>
+                </div>
+                <div className="d-flex flex-wrap fs-5">
+                    <span className='fs-5'>In room :</span>
+                    {users.map((user, index) => (
+                        <span key={index} className="badge mx-1 px-3 fs-6" style={{ backgroundColor: `#${user}` }}> </span>
+                    ))}
                 </div>
 
-                <div className="d-flex flex-column flex-fill overflow-auto pt-2 border" style={{ minHeight: '70vh', maxHeight: '70vh', scrollbarWidth: 'thin', scrollMarginBottom: '10px' }} >
+                <div className="d-flex flex-column flex-fill overflow-auto pt-2 border" style={{ minHeight: '65vh', maxHeight: '70vh', scrollbarWidth: 'thin', scrollMarginBottom: '10px' }} >
                     {messages.map((msgData, index) => {
                         const isUserMessage = msgData.varUid === uid;
-                        const messageContainer = `p-0 mx-1 text-${isUserMessage ? 'end' : 'start'}`
-                        const messageClass = `d-inline-block my-1 px-2 fs-5 rounded-${isUserMessage ? 'start-4' : 'end-4'} border-4`;
+                        const messageContainer = `p-0 mx-1 text-${isUserMessage && msgData.type === 'message' ? 'end' : msgData.type === 'info' ? 'center' : 'start'}`;
+                        const messageClass = `d-inline-block my-1 px-2 rounded-${isUserMessage && msgData.type === 'message' ? 'start-4 fs-5' : msgData.type === 'info' ? '4 fs-6' : 'end-4 fs-5'} border-4`;
 
                         return (
                             <div className={messageContainer}>

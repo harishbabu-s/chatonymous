@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
 
 import Nav from './Nav';
 import CreateRoom from './CreateRoom';
@@ -11,13 +13,30 @@ import JoinRoom from './JoinRoom';
 // import bgImage from '../assets/bg-home.png';
 import bgImage from '../assets/bg-fit-home.png';
 import Samples from './Samples';
+import config from '../config';
 
 function Home() {
     const [roomChoice, setRoomChoice] = useState('create');
 
+    async function server() {
+        try {
+            axios.get(`${config.apiUrl}/`)
+                .then((res) => {
+                    console.log(res);
+                }).catch((err) => {
+                    console.log(err);
+                });
+        } catch (error) {
+            console.log(error);
+        }
+    }
     const handleButton = (choice) => {
         setRoomChoice(choice);
     }
+
+    useEffect(() => {
+        // server();
+    }, []);
 
     return (
         <>
@@ -35,13 +54,13 @@ function Home() {
 
                             <div className=" rounded m-3 py-2" style={{ backgroundColor: '#edefec' }}>
                                 <button
-                                    className={`btn btn-sm mx-xs-12 mx-sm-5 mx-md-5 mx-lg-4 mx-xl-5 my-2 ${roomChoice === 'create' ? 'btn-dark' : 'btn-secondary'}`}
+                                    className={`btn btn-sm mx-xs-1 mx-sm-5 mx-md-5 mx-lg-4 mx-xl-5 my-2 ${roomChoice === 'create' ? 'btn-dark' : 'btn-secondary'}`}
                                     onClick={() => handleButton('create')}
                                 >
                                     Create Room
                                 </button>
                                 <button
-                                    className={`btn btn-sm mx-xs-12 mx-sm-5 mx-md-5 mx-lg-4 mx-xl-5 my-2 ${roomChoice === 'join' ? 'btn-dark' : 'btn-secondary'}`}
+                                    className={`btn btn-sm mx-xs-1 mx-sm-5 mx-md-5 mx-lg-4 mx-xl-5 my-2 ${roomChoice === 'join' ? 'btn-dark' : 'btn-secondary'}`}
                                     onClick={() => handleButton('join')}
                                 >
                                     Join Room
